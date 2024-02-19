@@ -18,16 +18,26 @@ def create_database():
 
 
 def insert_data_from_csv():
-    with open('data/movielist.csv', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile, delimiter=';')
-        rows = [(int(row['year']), row['title'], row['studios'], row['producers'], row['winner']) for row in reader]
+    conn = sqlite3.connect(DATABASE)
 
-        conn = sqlite3.connect(DATABASE)
-        c = conn.cursor()
-        c.executemany('INSERT INTO movies VALUES (?, ?, ?, ?, ?)', rows)
-        conn.commit()
-        conn.close()
+    try:
+        with open('data/movielist.csv', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
 
+            # Check if the CSV file has the expected columns
+            if not all(key in reader.fieldnames for key in ['year', 'title', 'studios', 'producers', 'winner']):
+                raise FileNotFoundError("CSV file doesn't follow the expected schema")
+
+            rows = [(int(row['year']), row['title'], row['studios'], row['producers'], row['winner']) for row in reader]
+
+            c = conn.cursor()
+            c.executemany('INSERT INTO movies VALUES (?, ?, ?, ?, ?)', rows)
+            conn.commit()
+            conn.close()
+    except FileNotFoundError as e:
+        # Rollback the changes if the CSV file doesn't follow the expected schema
+        conn.rollback()
+        raise e
 
 @app.before_first_request
 def before_first_request():
@@ -66,7 +76,6 @@ def get_producer_intervals():
                 previous_win_year = year
 
     conn.close()
-
     # Find the minimum and maximum intervals for each producer
     results_min = []
     results_max = []
