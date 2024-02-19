@@ -46,3 +46,44 @@ pip install -r requirements.txt
 ```
 
 
+## Running the Application
+To run the Flask application, execute the following command:
+
+```bash
+python app.py
+```
+The application will start running on http://localhost:5000/ by default.
+
+##Running the Tests
+To run the integration tests, execute the following command:
+
+
+```bash
+python -m unittest discover tests
+```
+
+This command will discover and run all the test files within the tests directory.
+
+##API Endpoints
+GET /api/producers: Retrieve minimum and maximum intervals for all producers.
+GET /api/producers/<producer_name>: Retrieve minimum and maximum intervals for a specific producer.
+
+##CSV File Format
+The CSV file containing the Golden Raspberry Awards data should have the following format:
+
+
+```sql
+year;title;studios;producers;winner
+```
+
+## Built With
+
+ - Flask - Web framework for Python
+ - SQLite - Embedded relational database
+ - unittest - Unit testing framework for Python
+
+
+##License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+
