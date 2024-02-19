@@ -2,6 +2,28 @@
 
 This project is a simple Flask application that serves as a backend for retrieving information about Golden Raspberry Awards (Razzie Awards) nominees and winners in the category of Worst Film. It provides a RESTful API to query data about producers with the longest and shortest intervals between consecutive wins, as well as to retrieve intervals for specific producers.
 
+## Project Directory Format
+
+The project directory should be structured as follows:
+
+
+```
+project/
+│
+├── app.py
+├── data/
+│ └── movielist.csv
+│
+└── tests/
+└── test_csv_format.p
+```
+
+
+- `app.py`: The main Flask application file.
+- `data/`: Directory containing the CSV file with Golden Raspberry Awards data.
+- `tests/`: Directory containing the integration tests for the Flask application.
+
+
 ## Getting Started
 
 These instructions will help you set up and run the project on your local machine.
