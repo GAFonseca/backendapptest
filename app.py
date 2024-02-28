@@ -1,11 +1,18 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from collections import defaultdict
 import csv
 import sqlite3
+from markupsafe import escape
+
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# sns.set(style="whitegrid",rc={"figure.figsize": (17, 8)})
 
 app = Flask(__name__)
 
 DATABASE = 'database.db'
+appHasRunBefore:bool = False
+
 
 
 def create_database():
@@ -39,13 +46,21 @@ def insert_data_from_csv():
         conn.rollback()
         raise e
 
-@app.before_first_request
+@app.before_request
 def before_first_request():
-    create_database()
-    insert_data_from_csv()
+
+    global appHasRunBefore
+    if not appHasRunBefore:
+        create_database()
+        insert_data_from_csv()
+        appHasRunBefore=True
 
 
 
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return make_response(jsonify({'error': 'Endpoint not found'}), 404)
 
 @app.route('/api/producers', methods=['GET'])
 def get_producer_intervals():
@@ -79,11 +94,22 @@ def get_producer_intervals():
     # Find the minimum and maximum intervals for each producer
     results_min = []
     results_max = []
+    max_interval = float('-inf')
+    min_interval = float('inf')
     for producer, intervals in producers.items():
-        min_interval = min(intervals, key=lambda x: x["interval"])
-        max_interval = max(intervals, key=lambda x: x["interval"])
-        results_min.append(min_interval)
-        results_max.append(max_interval)
+        interval = min(intervals, key=lambda x: x["interval"])
+        if interval["interval"]<min_interval:
+            min_interval = interval["interval"]
+            results_min = [interval]
+        elif interval["interval"]==min_interval:
+            results_min.append(interval)
+
+        interval = max(intervals, key=lambda x: x["interval"])
+        if interval["interval"]>max_interval:
+            max_interval = interval["interval"]
+            results_max = [interval]
+        elif interval["interval"]==max_interval:
+            results_max.append(interval)
 
     return jsonify({"min": results_min, "max": results_max})
 
